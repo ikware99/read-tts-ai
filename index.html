@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>中文小说语音阅读器</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <h1>中文小说语音阅读器</h1>
+            <p>专业女性角色配音，沉浸式阅读体验</p>
+        </header>
+
+        <main class="app-main">
+            <div class="left-panel">
+                <section class="input-section">
+                    <div class="section-header">
+                        <h2>文本输入</h2>
+                        <div class="file-upload">
+                            <input type="file" id="fileInput" accept=".txt,.md" style="display: none;">
+                            <label for="fileInput" class="btn btn-secondary">上传文件</label>
+                            <button id="loadExample" class="btn btn-secondary">示例文本</button>
+                        </div>
+                    </div>
+                    <textarea id="textInput" placeholder="请输入或粘贴中文小说文本..."></textarea>
+                    <button id="processText" class="btn btn-primary">处理文本</button>
+                </section>
+
+                <section class="voice-settings">
+                    <h2>语音设置</h2>
+                    <div class="setting-group">
+                        <label for="voiceSelect">选择配音</label>
+                        <select id="voiceSelect">
+                            <option value="zh-CN-XiaoxiaoNeural">晓晓（年轻活力）</option>
+                            <option value="zh-CN-XiaoyiNeural">晓伊（甜美温柔）</option>
+                            <option value="zh-CN-YunxiNeural">云希（清晰标准）</option>
+                        </select>
+                    </div>
+                    <div class="setting-group">
+                        <label for="rateSlider">语速: <span id="rateValue">1.0x</span></label>
+                        <input type="range" id="rateSlider" min="0.5" max="2.0" step="0.1" value="1.0">
+                    </div>
+                    <div class="setting-group">
+                        <label for="pitchSlider">音调: <span id="pitchValue">1.0x</span></label>
+                        <input type="range" id="pitchSlider" min="0.5" max="2.0" step="0.1" value="1.0">
+                    </div>
+                    <div class="setting-group">
+                        <label for="volumeSlider">音量: <span id="volumeValue">80%</span></label>
+                        <input type="range" id="volumeSlider" min="0" max="100" step="1" value="80">
+                    </div>
+                </section>
+
+                <section class="playback-control">
+                    <h2>播放控制</h2>
+                    <div class="control-buttons">
+                        <button id="playBtn" class="btn btn-primary btn-large">播放</button>
+                        <button id="pauseBtn" class="btn btn-secondary btn-large">暂停</button>
+                        <button id="stopBtn" class="btn btn-secondary btn-large">停止</button>
+                    </div>
+                    <div class="progress-section">
+                        <div class="waveform-container">
+                            <canvas id="waveformCanvas" width="300" height="60"></canvas>
+                        </div>
+                        <div class="progress-info">
+                            <span id="currentTime">00:00</span>
+                            <span id="duration">00:00</span>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <div class="right-panel">
+                <section class="output-section">
+                    <div class="section-header">
+                        <h2>分词结果</h2>
+                        <div class="stats">
+                            <span>段落: <span id="paragraphCount">0</span></span>
+                            <span>字数: <span id="charCount">0</span></span>
+                        </div>
+                    </div>
+                    <div id="segmentedText" class="segmented-text"></div>
+                </section>
+            </div>
+        </main>
+
+    <!-- 浮动控制栏 -->
+    <div class="floating-controls" id="floatingControls">
+        <div class="controls-container">
+            <button id="floatPlayBtn" class="control-btn play-btn">▶</button>
+            <button id="floatVolumeUp" class="control-btn volume-btn">🔊</button>
+            <button id="floatVolumeDown" class="control-btn volume-btn">🔉</button>
+        </div>
+    </div>
+
+    <footer class="app-footer">
+        <p>中文小说语音阅读器 - 基于Edge TTS技术 | 所有数据均在本地处理，保护隐私</p>
+    </footer>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

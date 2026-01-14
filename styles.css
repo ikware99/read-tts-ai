@@ -1,0 +1,492 @@
+/* 全局样式重置 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
+    line-height: 1.6;
+    color: #333;
+    background: linear-gradient(135deg, #fff0f5 0%, #ffe4e1 100%);
+}
+
+/* 主容器 */
+.app-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* 头部样式 */
+.app-header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding: 20px;
+    background: rgba(255, 182, 193, 0.2);
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(255, 105, 180, 0.1);
+}
+
+.app-header h1 {
+    color: #ff69b4;
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+    text-shadow: 2px 2px 4px rgba(255, 105, 180, 0.3);
+}
+
+.app-header p {
+    color: #ff1493;
+    font-size: 1.1rem;
+}
+
+/* 主内容区域 */
+.app-main {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+/* 左侧面板 */
+.left-panel {
+    flex: 1;
+    min-width: 300px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* 右侧面板 */
+.right-panel {
+    flex: 1.5;
+    min-width: 300px;
+}
+
+/* 通用章节样式 */
+section {
+    background: white;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(255, 105, 180, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+section:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(255, 105, 180, 0.15);
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #ffb6c1;
+}
+
+.section-header h2 {
+    color: #ff69b4;
+    font-size: 1.3rem;
+}
+
+/* 按钮样式 */
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.btn-primary {
+    background: linear-gradient(45deg, #ff69b4, #ff1493);
+    color: white;
+    box-shadow: 0 4px 15px rgba(255, 105, 180, 0.3);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 105, 180, 0.4);
+}
+
+.btn-secondary {
+    background: linear-gradient(45deg, #ffb6c1, #ffc0cb);
+    color: #333;
+    margin-left: 10px;
+}
+
+.btn-secondary:hover {
+    background: linear-gradient(45deg, #ffc0cb, #ffdab9);
+    transform: translateY(-2px);
+}
+
+.btn-large {
+    padding: 12px 30px;
+    font-size: 1rem;
+}
+
+/* 文本输入区域 */
+#textInput {
+    width: 100%;
+    height: 200px;
+    padding: 15px;
+    border: 2px solid #ffb6c1;
+    border-radius: 10px;
+    resize: vertical;
+    font-size: 1rem;
+    font-family: inherit;
+    line-height: 1.6;
+    transition: border-color 0.3s ease;
+}
+
+#textInput:focus {
+    outline: none;
+    border-color: #ff69b4;
+    box-shadow: 0 0 0 3px rgba(255, 105, 180, 0.1);
+}
+
+#processText {
+    margin-top: 15px;
+    width: 100%;
+}
+
+/* 文件上传 */
+.file-upload {
+    display: flex;
+    gap: 10px;
+}
+
+/* 语音设置 */
+.voice-settings {
+    margin-top: 20px;
+}
+
+.setting-group {
+    margin-bottom: 20px;
+}
+
+.setting-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #666;
+    font-weight: 600;
+}
+
+.setting-group select,
+.setting-group input[type="range"] {
+    width: 100%;
+    padding: 10px;
+    border: 2px solid #ffb6c1;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+}
+
+.setting-group select:focus,
+.setting-group input[type="range"]:focus {
+    outline: none;
+    border-color: #ff69b4;
+}
+
+.setting-group input[type="range"] {
+    padding: 0;
+    cursor: pointer;
+}
+
+/* 播放控制 */
+.control-buttons {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.progress-section {
+    margin-top: 20px;
+}
+
+.waveform-container {
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: center;
+    background: #f8f8f8;
+    border-radius: 8px;
+    padding: 10px;
+}
+
+#waveformCanvas {
+    background: white;
+    border-radius: 5px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.progress-info {
+    display: flex;
+    justify-content: space-between;
+    color: #666;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+/* 输出区域 */
+.output-section {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.segmented-text {
+    flex: 1;
+    overflow-y: auto;
+    max-height: 600px;
+    padding: 15px;
+    background: #faf0e6;
+    border-radius: 10px;
+    border: 2px solid #ffb6c1;
+}
+
+.paragraph {
+    margin-bottom: 20px;
+    padding: 15px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-left: 4px solid #ff69b4;
+}
+
+.paragraph:hover {
+    transform: translateX(5px);
+    box-shadow: 0 4px 15px rgba(255, 105, 180, 0.2);
+    background: #fff0f5;
+}
+
+.paragraph.active {
+    background: #ffe4e1;
+    border-left-color: #ff1493;
+    box-shadow: 0 4px 15px rgba(255, 105, 180, 0.3);
+}
+
+.word {
+    display: inline-block;
+    margin: 2px;
+    padding: 3px 8px;
+    background: #ffb6c1;
+    color: #333;
+    border-radius: 15px;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.word:hover {
+    background: #ff69b4;
+    color: white;
+    transform: scale(1.05);
+}
+
+/* 统计信息 */
+.stats {
+    display: flex;
+    gap: 20px;
+    color: #666;
+    font-weight: 600;
+}
+
+.stats span {
+    background: #ffb6c1;
+    padding: 5px 15px;
+    border-radius: 15px;
+    color: white;
+}
+
+/* 页脚 */
+.app-footer {
+    text-align: center;
+    margin-top: 30px;
+    padding: 20px;
+    background: rgba(255, 182, 193, 0.2);
+    border-radius: 15px;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .app-main {
+        flex-direction: column;
+    }
+    
+    .app-header h1 {
+        font-size: 2rem;
+    }
+    
+    .control-buttons {
+        flex-direction: column;
+    }
+    
+    .btn {
+        width: 100%;
+    }
+    
+    .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .stats {
+        width: 100%;
+        justify-content: space-around;
+    }
+}
+
+/* 滚动条样式 */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #ffb6c1;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #ff69b4;
+}
+
+/* 动画效果 */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.paragraph {
+    animation: fadeIn 0.5s ease-out;
+}
+
+/* 波形图容器 */
+.waveform-container {
+    position: relative;
+    overflow: hidden;
+}
+
+/* 进度时间样式 */
+#currentTime, #duration {
+    font-weight: bold;
+    color: #ff69b4;
+}
+
+/* 浮动控制栏样式 */
+.floating-controls {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+    transition: all 0.3s ease;
+}
+
+.controls-container {
+    display: flex;
+    gap: 10px;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 10px;
+    border-radius: 50px;
+    box-shadow: 0 4px 15px rgba(255, 105, 180, 0.3);
+    transition: all 0.3s ease;
+}
+
+.floating-controls.collapsed .controls-container {
+    gap: 0;
+    padding: 10px;
+}
+
+.floating-controls.collapsed .volume-btn {
+    opacity: 0;
+    visibility: hidden;
+    width: 0;
+    padding: 0;
+}
+
+.control-btn {
+    width: 50px;
+    height: 50px;
+    border: none;
+    border-radius: 50%;
+    background: linear-gradient(45deg, #ff69b4, #ff1493);
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(255, 105, 180, 0.3);
+}
+
+.control-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 15px rgba(255, 105, 180, 0.5);
+}
+
+.control-btn:active {
+    transform: scale(0.95);
+}
+
+.play-btn {
+    width: 60px;
+    height: 60px;
+    font-size: 24px;
+}
+
+.floating-controls:hover {
+    transform: translateY(-5px);
+}
+
+/* 折叠动画 */
+@keyframes collapse {
+    from {
+        transform: scale(1);
+        opacity: 1;
+    }
+    to {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+}
+
+@keyframes expand {
+    from {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.floating-controls.collapsed .volume-btn {
+    animation: collapse 0.3s ease forwards;
+}
+
+.floating-controls:not(.collapsed) .volume-btn {
+    animation: expand 0.3s ease forwards;
+}

@@ -1,0 +1,1481 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>中文小说语音阅读器 v2</title>
+    <style>
+        /* 全局样式重置 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #fff0f5 0%, #ffe4e1 100%);
+        }
+
+        /* 主容器 */
+        .app-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 10px;
+        }
+
+        /* 头部样式 */
+        .app-header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(255, 182, 193, 0.2);
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(255, 105, 180, 0.1);
+        }
+
+        .app-header h1 {
+            color: #ff69b4;
+            font-size: 1.8rem;
+            margin-bottom: 8px;
+            text-shadow: 2px 2px 4px rgba(255, 105, 180, 0.3);
+        }
+
+        .app-header p {
+            color: #ff1493;
+            font-size: 0.9rem;
+        }
+
+        /* 主内容区域 */
+        .app-main {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        /* 左侧面板 */
+        .left-panel {
+            flex: 1;
+            min-width: 280px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        /* 右侧面板 */
+        .right-panel {
+            flex: 1.5;
+            min-width: 280px;
+        }
+
+        /* 通用章节样式 */
+        section {
+            background: white;
+            padding: 15px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(255, 105, 180, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        section:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(255, 105, 180, 0.15);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #ffb6c1;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .section-header h2 {
+            color: #ff69b4;
+            font-size: 1.1rem;
+        }
+
+        /* 按钮样式 */
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #ff69b4, #ff1493);
+            color: white;
+            box-shadow: 0 4px 15px rgba(255, 105, 180, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 105, 180, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(45deg, #ffb6c1, #ffc0cb);
+            color: #333;
+            margin-left: 8px;
+        }
+
+        .btn-secondary:hover {
+            background: linear-gradient(45deg, #ffc0cb, #ffdab9);
+            transform: translateY(-2px);
+        }
+
+        .btn-large {
+            padding: 10px 25px;
+            font-size: 0.9rem;
+        }
+
+        /* 文本输入区域 */
+        #textInput {
+            width: 100%;
+            height: 150px;
+            padding: 12px;
+            border: 2px solid #ffb6c1;
+            border-radius: 10px;
+            resize: vertical;
+            font-size: 0.9rem;
+            font-family: inherit;
+            line-height: 1.6;
+            transition: border-color 0.3s ease;
+        }
+
+        #textInput:focus {
+            outline: none;
+            border-color: #ff69b4;
+            box-shadow: 0 0 0 3px rgba(255, 105, 180, 0.1);
+        }
+
+        #processText {
+            margin-top: 12px;
+            width: 100%;
+        }
+
+        /* 文件上传 */
+        .file-upload {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        /* 语音设置 */
+        .voice-settings {
+            margin-top: 15px;
+        }
+
+        .setting-group {
+            margin-bottom: 15px;
+        }
+
+        .setting-group label {
+            display: block;
+            margin-bottom: 6px;
+            color: #666;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .setting-group select,
+        .setting-group input[type="range"] {
+            width: 100%;
+            padding: 8px;
+            border: 2px solid #ffb6c1;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .setting-group select:focus,
+        .setting-group input[type="range"]:focus {
+            outline: none;
+            border-color: #ff69b4;
+        }
+
+        .setting-group input[type="range"] {
+            padding: 0;
+            cursor: pointer;
+        }
+
+        /* 播放控制 */
+        .control-buttons {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .progress-section {
+            margin-top: 15px;
+        }
+
+        .waveform-container {
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: center;
+            background: #f8f8f8;
+            border-radius: 8px;
+            padding: 8px;
+        }
+
+        #waveformCanvas {
+            background: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            max-width: 100%;
+        }
+
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            color: #666;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        /* 输出区域 */
+        .output-section {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .segmented-text {
+            flex: 1;
+            overflow-y: auto;
+            max-height: 500px;
+            padding: 12px;
+            background: #faf0e6;
+            border-radius: 10px;
+            border: 2px solid #ffb6c1;
+        }
+
+        .paragraph {
+            margin-bottom: 15px;
+            padding: 12px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 4px solid #ff69b4;
+        }
+
+        .paragraph:hover {
+            transform: translateX(4px);
+            box-shadow: 0 4px 15px rgba(255, 105, 180, 0.2);
+            background: #fff0f5;
+        }
+
+        .paragraph.active {
+            background: #ffe4e1;
+            border-left-color: #ff1493;
+            box-shadow: 0 4px 15px rgba(255, 105, 180, 0.3);
+        }
+
+        .word {
+            display: inline-block;
+            margin: 2px;
+            padding: 3px 8px;
+            background: #ffb6c1;
+            color: #333;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+        }
+
+        .word:hover {
+            background: #ff69b4;
+            color: white;
+            transform: scale(1.05);
+        }
+
+        /* 统计信息 */
+        .stats {
+            display: flex;
+            gap: 15px;
+            color: #666;
+            font-weight: 600;
+            font-size: 0.8rem;
+        }
+
+        .stats span {
+            background: #ffb6c1;
+            padding: 4px 12px;
+            border-radius: 15px;
+            color: white;
+        }
+
+        /* 页脚 */
+        .app-footer {
+            text-align: center;
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(255, 182, 193, 0.2);
+            border-radius: 15px;
+            color: #666;
+            font-size: 0.8rem;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .app-main {
+                flex-direction: column;
+            }
+            
+            .app-header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .control-buttons {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+            
+            .section-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+            
+            .stats {
+                width: 100%;
+                justify-content: space-around;
+                flex-wrap: wrap;
+            }
+            
+            .segmented-text {
+                max-height: 400px;
+            }
+        }
+
+        /* 滚动条样式 */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #ffb6c1;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #ff69b4;
+        }
+
+        /* 动画效果 */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .paragraph {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        /* 波形图容器 */
+        .waveform-container {
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 进度时间样式 */
+        #currentTime, #duration {
+            font-weight: bold;
+            color: #ff69b4;
+        }
+
+        /* 浮动控制栏样式 */
+        .floating-controls {
+            position: fixed;
+            bottom: 15px;
+            right: 15px;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .controls-container {
+            display: flex;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 8px;
+            border-radius: 50px;
+            box-shadow: 0 4px 15px rgba(255, 105, 180, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .floating-controls.collapsed .controls-container {
+            gap: 0;
+            padding: 8px;
+        }
+
+        .floating-controls.collapsed .volume-btn {
+            opacity: 0;
+            visibility: hidden;
+            width: 0;
+            padding: 0;
+        }
+
+        .control-btn {
+            width: 45px;
+            height: 45px;
+            border: none;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #ff69b4, #ff1493);
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(255, 105, 180, 0.3);
+        }
+
+        .control-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 15px rgba(255, 105, 180, 0.5);
+        }
+
+        .control-btn:active {
+            transform: scale(0.95);
+        }
+
+        .play-btn {
+            width: 55px;
+            height: 55px;
+            font-size: 22px;
+        }
+
+        .floating-controls:hover {
+            transform: translateY(-3px);
+        }
+
+        /* 折叠动画 */
+        @keyframes collapse {
+            from {
+                transform: scale(1);
+                opacity: 1;
+            }
+            to {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+        }
+
+        @keyframes expand {
+            from {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .floating-controls.collapsed .volume-btn {
+            animation: collapse 0.3s ease forwards;
+        }
+
+        .floating-controls:not(.collapsed) .volume-btn {
+            animation: expand 0.3s ease forwards;
+        }
+        
+        /* 加载动画样式 */
+        .loading-overlay {
+            position: relative;
+            margin: 15px 0;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(255, 105, 180, 0.1);
+            text-align: center;
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid #ffb6c1;
+            border-top: 4px solid #ff69b4;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .loading-text {
+            color: #ff69b4;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        /* 移动端优化 */
+        @media (max-width: 480px) {
+            .app-container {
+                padding: 5px;
+            }
+            
+            section {
+                padding: 10px;
+            }
+            
+            .app-header {
+                padding: 10px;
+                margin-bottom: 15px;
+            }
+            
+            .segmented-text {
+                max-height: 300px;
+                padding: 8px;
+            }
+            
+            .paragraph {
+                padding: 10px;
+                margin-bottom: 12px;
+            }
+            
+            .control-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 14px;
+            }
+            
+            .play-btn {
+                width: 50px;
+                height: 50px;
+                font-size: 20px;
+            }
+            
+            .loading-spinner {
+                width: 30px;
+                height: 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <h1>中文小说语音阅读器</h1>
+            <p>专业女性角色配音，沉浸式阅读体验</p>
+        </header>
+
+        <main class="app-main">
+            <div class="left-panel">
+                <section class="input-section">
+                    <div class="section-header">
+                        <h2>文本输入</h2>
+                        <div class="file-upload">
+                            <input type="file" id="fileInput" accept=".txt,.md" style="display: none;">
+                            <label for="fileInput" class="btn btn-secondary">上传文件</label>
+                            <button id="loadExample" class="btn btn-secondary">示例文本</button>
+                        </div>
+                    </div>
+                    <div style="margin-bottom: 10px; display: flex; align-items: center;">
+                        <input type="checkbox" id="autoProcess" name="autoProcess" checked>
+                        <label for="autoProcess" style="margin-left: 8px; color: #666; font-weight: 600;">上传文件后自动分页分词处理</label>
+                    </div>
+                    <textarea id="textInput" placeholder="请输入或粘贴中文小说文本..."></textarea>
+                    
+                    <!-- 加载动画 -->
+                    <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+                        <div class="loading-spinner"></div>
+                        <div class="loading-text">正在处理文件...</div>
+                    </div>
+                    
+                    <button id="processText" class="btn btn-primary">处理文本</button>
+                </section>
+
+                <section class="voice-settings">
+                    <h2>语音设置</h2>
+                    <div class="setting-group">
+                        <label for="voiceSelect">选择配音</label>
+                        <select id="voiceSelect">
+                            <option value="zh-CN-XiaoxiaoNeural">晓晓（年轻活力）</option>
+                            <option value="zh-CN-XiaoyiNeural">晓伊（甜美温柔）</option>
+                            <option value="zh-CN-YunxiNeural">云希（清晰标准）</option>
+                        </select>
+                    </div>
+                    <div class="setting-group">
+                        <label for="rateSlider">语速: <span id="rateValue">1.0x</span></label>
+                        <input type="range" id="rateSlider" min="0.5" max="2.0" step="0.1" value="1.0">
+                    </div>
+                    <div class="setting-group">
+                        <label for="pitchSlider">音调: <span id="pitchValue">1.0x</span></label>
+                        <input type="range" id="pitchSlider" min="0.5" max="2.0" step="0.1" value="1.0">
+                    </div>
+                    <div class="setting-group">
+                        <label for="volumeSlider">音量: <span id="volumeValue">80%</span></label>
+                        <input type="range" id="volumeSlider" min="0" max="100" step="1" value="80">
+                    </div>
+                </section>
+
+                <section class="playback-control">
+                    <h2>播放控制</h2>
+                    <div class="control-buttons">
+                        <button id="playBtn" class="btn btn-primary btn-large">播放</button>
+                        <button id="pauseBtn" class="btn btn-secondary btn-large">暂停</button>
+                        <button id="stopBtn" class="btn btn-secondary btn-large">停止</button>
+                    </div>
+                    <div class="progress-section">
+                        <div class="waveform-container">
+                            <canvas id="waveformCanvas" width="250" height="50"></canvas>
+                        </div>
+                        <div class="progress-info">
+                            <span id="currentTime">00:00</span>
+                            <span id="duration">00:00</span>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <div class="right-panel">
+                <section class="output-section">
+                    <div class="section-header">
+                        <h2>分词结果</h2>
+                        <div class="stats">
+                            <span>段落: <span id="paragraphCount">0</span></span>
+                            <span>字数: <span id="charCount">0</span></span>
+                        </div>
+                    </div>
+                    <div id="segmentedText" class="segmented-text"></div>
+                </section>
+            </div>
+        </main>
+
+        <!-- 浮动控制栏 -->
+        <div class="floating-controls" id="floatingControls">
+            <div class="controls-container">
+                <button id="floatPlayBtn" class="control-btn play-btn">▶</button>
+                <button id="floatVolumeUp" class="control-btn volume-btn">🔊</button>
+                <button id="floatVolumeDown" class="control-btn volume-btn">🔉</button>
+            </div>
+        </div>
+
+        <footer class="app-footer">
+            <p>中文小说语音阅读器 v2 - 基于浏览器语音合成技术 | 所有数据均在本地处理</p>
+        </footer>
+    </div>
+
+    <script>
+        // 中文小说语音阅读器主脚本
+
+        class ChineseTTSReader {
+            constructor() {
+                this.segmentedText = [];
+                this.currentParagraph = 0;
+                this.isPlaying = false;
+                this.speechSynthesis = window.speechSynthesis;
+                this.utterance = null;
+                this.audioContext = null;
+                this.analyser = null;
+                this.dataArray = null;
+                this.source = null;
+                this.voices = [];
+                this.scrollTimer = null;
+                this.autoScrollEnabled = true;
+                this.floatControlsTimer = null;
+                this.isControlsCollapsed = false;
+                this.retryCount = 0;
+                this.doubleClickTimer = null;
+                this.doubleClickCount = 0;
+                this.highlightEnabled = true;
+                
+                this.init();
+            }
+
+            init() {
+                this.bindEvents();
+                this.initWaveform();
+                this.updateStats();
+                this.initVoices();
+            }
+
+            // 初始化语音列表
+            initVoices() {
+                // 获取当前可用语音
+                this.voices = this.speechSynthesis.getVoices();
+                
+                // 监听语音列表加载完成事件
+                this.speechSynthesis.onvoiceschanged = () => {
+                    this.voices = this.speechSynthesis.getVoices();
+                    console.log('可用语音列表加载完成:', this.voices.map(v => v.name));
+                };
+            }
+
+            // 获取指定voiceURI的语音对象
+            getVoiceByURI(voiceURI) {
+                // 尝试匹配voiceURI
+                let voice = this.voices.find(voice => 
+                    voice.voiceURI === voiceURI || 
+                    voice.name === voiceURI ||
+                    voice.name.includes(voiceURI.split('-')[2])
+                );
+                
+                // 如果找不到匹配的语音，尝试返回中文语音
+                if (!voice) {
+                    voice = this.voices.find(voice => voice.lang === 'zh-CN');
+                }
+                
+                // 如果还是找不到，返回默认语音
+                if (!voice && this.voices.length > 0) {
+                    voice = this.voices[0];
+                }
+                
+                return voice;
+            }
+
+            // 检查浏览器是否支持语音合成
+            checkSpeechSupport() {
+                if ('speechSynthesis' in window) {
+                    // 检查是否有可用语音
+                    if (this.voices.length === 0) {
+                        // 尝试立即获取语音列表
+                        this.voices = this.speechSynthesis.getVoices();
+                        
+                        if (this.voices.length === 0) {
+                            alert('您的浏览器支持语音合成，但未检测到可用语音。请检查浏览器设置或更新浏览器版本。');
+                            return false;
+                        }
+                    }
+                    return true;
+                } else {
+                    alert('您的浏览器不支持语音合成功能，请使用Chrome 33+、Edge 14+或Safari 7+浏览器');
+                    return false;
+                }
+            }
+
+            // 获取语音列表并等待加载完成
+            async getVoicesAsync() {
+                return new Promise((resolve) => {
+                    let voices = this.speechSynthesis.getVoices();
+                    if (voices.length > 0) {
+                        resolve(voices);
+                        return;
+                    }
+
+                    this.speechSynthesis.onvoiceschanged = () => {
+                        voices = this.speechSynthesis.getVoices();
+                        resolve(voices);
+                    };
+
+                    // 超时处理
+                    setTimeout(() => {
+                        resolve(this.speechSynthesis.getVoices());
+                    }, 2000);
+                });
+            }
+
+            // 绑定事件监听器
+            bindEvents() {
+                // 处理文本按钮
+                document.getElementById('processText').addEventListener('click', () => {
+                    this.processText();
+                });
+
+                // 播放控制按钮
+                document.getElementById('playBtn').addEventListener('click', () => {
+                    this.play();
+                });
+
+                document.getElementById('pauseBtn').addEventListener('click', () => {
+                    this.pause();
+                });
+
+                document.getElementById('stopBtn').addEventListener('click', () => {
+                    this.stop();
+                });
+
+                // 语音参数调节
+                document.getElementById('rateSlider').addEventListener('input', (e) => {
+                    document.getElementById('rateValue').textContent = `${e.target.value}x`;
+                });
+
+                document.getElementById('pitchSlider').addEventListener('input', (e) => {
+                    document.getElementById('pitchValue').textContent = `${e.target.value}x`;
+                });
+
+                document.getElementById('volumeSlider').addEventListener('input', (e) => {
+                    document.getElementById('volumeValue').textContent = `${e.target.value}%`;
+                });
+
+                // 文件上传
+                document.getElementById('fileInput').addEventListener('change', (e) => {
+                    this.loadFile(e.target.files[0]);
+                });
+
+                // 示例文本
+                document.getElementById('loadExample').addEventListener('click', () => {
+                    this.loadExampleText();
+                });
+
+                // 文本输入变化时更新统计
+                document.getElementById('textInput').addEventListener('input', () => {
+                    this.updateStats();
+                });
+                
+                // 监听滚动事件，用户手动滚动时禁用自动滚动
+                const outputSection = document.getElementById('segmentedText');
+                if (outputSection) {
+                    outputSection.addEventListener('scroll', () => {
+                        // 用户手动滚动，禁用自动滚动
+                        this.autoScrollEnabled = false;
+                        
+                        // 清除之前的计时器
+                        if (this.scrollTimer) {
+                            clearTimeout(this.scrollTimer);
+                        }
+                        
+                        // 5秒后恢复自动滚动
+                        this.scrollTimer = setTimeout(() => {
+                            this.restoreAutoScroll();
+                        }, 5000);
+                        
+                        // 重置浮动控制栏计时器
+                        this.resetFloatControlsTimer();
+                    });
+                }
+                
+                // 添加连续两次双击事件监听
+                document.addEventListener('dblclick', (e) => {
+                    // 只有点击空白区域才触发
+                    if (e.target.tagName === 'BODY' || e.target.className === 'app-container') {
+                        this.handleDoubleClick();
+                    }
+                });
+                
+                // 浮动控制栏事件绑定
+                this.initFloatingControls();
+            }
+
+            // 初始化波形显示
+            initWaveform() {
+                const canvas = document.getElementById('waveformCanvas');
+                const ctx = canvas.getContext('2d');
+                
+                // 绘制默认波形
+                this.drawDefaultWaveform(ctx, canvas.width, canvas.height);
+            }
+
+            // 绘制默认波形
+            drawDefaultWaveform(ctx, width, height) {
+                ctx.clearRect(0, 0, width, height);
+                ctx.strokeStyle = '#ff69b4';
+                ctx.lineWidth = 2;
+                
+                ctx.beginPath();
+                ctx.moveTo(0, height / 2);
+                
+                for (let i = 0; i < width; i++) {
+                    const x = i;
+                    const y = height / 2 + Math.sin(i * 0.02) * 15;
+                    ctx.lineTo(x, y);
+                }
+                
+                ctx.stroke();
+            }
+
+            // 智能中文分词处理
+            processText() {
+                const text = document.getElementById('textInput').value.trim();
+                if (!text) {
+                    alert('请输入文本内容');
+                    return;
+                }
+
+                // 显示加载动画
+                const loadingOverlay = document.getElementById('loadingOverlay');
+                loadingOverlay.style.display = 'block';
+
+                // 使用setTimeout将处理逻辑放入异步队列，防止UI阻塞
+                setTimeout(() => {
+                    try {
+                        // 基于标点符号和语义的智能分段
+                        this.segmentedText = this.segmentParagraphs(text);
+                        
+                        // 显示分词结果
+                        this.displaySegmentedText();
+                        
+                        // 更新统计信息
+                        this.updateStats();
+                    } catch (error) {
+                        console.error('处理文本时出错:', error);
+                        alert('处理文本时出错，请重试');
+                    } finally {
+                        // 隐藏加载动画
+                        loadingOverlay.style.display = 'none';
+                    }
+                }, 100);
+            }
+
+            // 基于标点符号和语义的智能分段，支持超长文本处理
+            segmentParagraphs(text) {
+                // 首先按换行符分段
+                let paragraphs = text.split(/[\r\n]+/).filter(p => p.trim());
+                
+                // 进一步按标点符号分句，处理超长文本
+                const sentenceEndings = /([。！？；…])/g;
+                const segmented = [];
+                const MAX_PARAGRAPH_LENGTH = 1500; // 最大段落长度限制
+                
+                paragraphs.forEach(para => {
+                    // 处理超长段落
+                    if (para.length > MAX_PARAGRAPH_LENGTH) {
+                        let remainingText = para;
+                        while (remainingText.length > MAX_PARAGRAPH_LENGTH) {
+                            // 在最大长度附近寻找合适的分割点
+                            let splitIndex = remainingText.lastIndexOf('。', MAX_PARAGRAPH_LENGTH);
+                            if (splitIndex === -1) {
+                                splitIndex = remainingText.lastIndexOf('！', MAX_PARAGRAPH_LENGTH);
+                            }
+                            if (splitIndex === -1) {
+                                splitIndex = remainingText.lastIndexOf('？', MAX_PARAGRAPH_LENGTH);
+                            }
+                            if (splitIndex === -1) {
+                                splitIndex = remainingText.lastIndexOf('；', MAX_PARAGRAPH_LENGTH);
+                            }
+                            if (splitIndex === -1) {
+                                // 找不到合适的标点符号，直接按最大长度分割
+                                splitIndex = MAX_PARAGRAPH_LENGTH;
+                            } else {
+                                // 包含标点符号
+                                splitIndex += 1;
+                            }
+                            
+                            let subParagraph = remainingText.substring(0, splitIndex);
+                            remainingText = remainingText.substring(splitIndex);
+                            
+                            // 处理子段落
+                            this.processSubParagraph(subParagraph, segmented);
+                        }
+                        
+                        // 处理剩余文本
+                        if (remainingText.trim()) {
+                            this.processSubParagraph(remainingText, segmented);
+                        }
+                    } else {
+                        // 正常长度段落，按原逻辑处理
+                        this.processSubParagraph(para, segmented);
+                    }
+                });
+                
+                return segmented;
+            }
+            
+            // 处理子段落
+            processSubParagraph(para, segmented) {
+                const sentenceEndings = /([。！？；…])/g;
+                let sentences = para.split(sentenceEndings);
+                
+                // 重组句子和标点
+                for (let i = 0; i < sentences.length; i += 2) {
+                    if (sentences[i]) {
+                        let sentence = sentences[i] + (sentences[i + 1] || '');
+                        segmented.push(this.segmentWords(sentence));
+                    }
+                }
+            }
+
+            // 中文分词处理（简化版，实际项目可集成更复杂的分词库）
+            segmentWords(sentence) {
+                // 移除多余空格
+                sentence = sentence.replace(/\s+/g, '');
+                
+                // 简单的中文分词实现，基于常见词语和单字
+                // 实际项目中建议使用成熟的分词库如 jieba.js
+                const commonWords = ['的', '了', '是', '在', '我', '有', '和', '就', '不', '人', '都', '一', '一个', '上', '也', '很', '到', '说', '要', '去', '你', '会', '着', '没有', '看', '好', '自己', '这'];
+                const words = [];
+                let i = 0;
+                
+                while (i < sentence.length) {
+                    let found = false;
+                    
+                    // 尝试匹配双字词语
+                    if (i < sentence.length - 1) {
+                        const twoChar = sentence.substr(i, 2);
+                        if (commonWords.includes(twoChar)) {
+                            words.push(twoChar);
+                            i += 2;
+                            found = true;
+                        }
+                    }
+                    
+                    // 尝试匹配单字词语
+                    if (!found) {
+                        const oneChar = sentence.substr(i, 1);
+                        if (commonWords.includes(oneChar)) {
+                            words.push(oneChar);
+                        } else {
+                            // 处理连续的非常用字
+                            let j = i + 1;
+                            while (j < sentence.length && !commonWords.includes(sentence.substr(j, 1))) {
+                                j++;
+                            }
+                            words.push(sentence.substr(i, j - i));
+                            i = j;
+                            continue;
+                        }
+                        i++;
+                    }
+                }
+                
+                return {
+                    text: sentence,
+                    words: words
+                };
+            }
+
+            // 显示分词结果
+            displaySegmentedText() {
+                const container = document.getElementById('segmentedText');
+                container.innerHTML = '';
+                
+                this.segmentedText.forEach((paragraph, index) => {
+                    const paraElement = document.createElement('div');
+                    paraElement.className = 'paragraph';
+                    paraElement.dataset.index = index;
+                    
+                    // 添加词语
+                    paragraph.words.forEach(word => {
+                        const wordElement = document.createElement('span');
+                        wordElement.className = 'word';
+                        wordElement.textContent = word;
+                        paraElement.appendChild(wordElement);
+                    });
+                    
+                    // 添加点击事件
+                    paraElement.addEventListener('click', () => {
+                        this.playFromParagraph(index);
+                    });
+                    
+                    container.appendChild(paraElement);
+                });
+            }
+
+            // 更新统计信息
+            updateStats() {
+                const text = document.getElementById('textInput').value;
+                const charCount = text.replace(/\s/g, '').length;
+                const paragraphCount = this.segmentedText.length;
+                
+                document.getElementById('charCount').textContent = charCount;
+                document.getElementById('paragraphCount').textContent = paragraphCount;
+            }
+
+            // 播放语音
+            play() {
+                if (this.segmentedText.length === 0) {
+                    alert('请先处理文本');
+                    return;
+                }
+                
+                if (this.isPlaying) {
+                    this.speechSynthesis.resume();
+                } else {
+                    this.speakCurrentParagraph();
+                }
+                
+                this.isPlaying = true;
+                this.updateFloatPlayBtn();
+            }
+
+            // 暂停播放
+            pause() {
+                if (this.isPlaying) {
+                    this.speechSynthesis.pause();
+                    this.isPlaying = false;
+                    this.updateFloatPlayBtn();
+                }
+            }
+
+            // 停止播放
+            stop() {
+                this.speechSynthesis.cancel();
+                this.isPlaying = false;
+                this.currentParagraph = 0;
+                this.updateActiveParagraph();
+                this.updateTimeDisplay(0, 0);
+                this.updateFloatPlayBtn();
+            }
+
+            // 从指定段落开始播放
+            playFromParagraph(index) {
+                this.stop();
+                this.currentParagraph = index;
+                this.isPlaying = true;
+                this.updateFloatPlayBtn();
+                // 异步调用，不需要等待完成
+                this.speakCurrentParagraph();
+            }
+
+            // 播放当前段落
+            speakCurrentParagraph() {
+                try {
+                    // 检查浏览器是否支持语音合成
+                    if (!('speechSynthesis' in window)) {
+                        alert('您的浏览器不支持语音合成功能，请使用Chrome 33+、Edge 14+或Safari 7+浏览器');
+                        this.isPlaying = false;
+                        this.updateFloatPlayBtn();
+                        return;
+                    }
+                    
+                    if (this.currentParagraph >= this.segmentedText.length) {
+                        this.stop();
+                        return;
+                    }
+                    
+                    // 更新当前活跃段落
+                    this.updateActiveParagraph();
+                    
+                    const paragraph = this.segmentedText[this.currentParagraph].text;
+                    
+                    // 简单的语音合成实现，使用浏览器默认语音
+                    const utterance = new SpeechSynthesisUtterance(paragraph);
+                    
+                    // 基本设置
+                    utterance.lang = 'zh-CN';
+                    utterance.rate = parseFloat(document.getElementById('rateSlider').value);
+                    utterance.pitch = parseFloat(document.getElementById('pitchSlider').value);
+                    utterance.volume = parseFloat(document.getElementById('volumeSlider').value) / 100;
+                    
+                    console.log('正在播放段落:', paragraph);
+                    console.log('语音设置:', {
+                        lang: utterance.lang,
+                        rate: utterance.rate,
+                        pitch: utterance.pitch,
+                        volume: utterance.volume
+                    });
+                    
+                    // 事件监听
+                    utterance.onend = () => {
+                        console.log('段落播放结束');
+                        this.currentParagraph++;
+                        this.speakCurrentParagraph();
+                    };
+                    
+                    utterance.onerror = (event) => {
+                        console.error('语音合成错误:', event.error, '错误事件:', event);
+                        this.isPlaying = false;
+                        this.updateFloatPlayBtn();
+                        
+                        // 简化的错误提示
+                        alert('语音合成失败，请尝试：\n1. 刷新页面\n2. 更换浏览器\n3. 检查浏览器语音设置');
+                    };
+                    
+                    // 开始播放
+                    this.speechSynthesis.speak(utterance);
+                    
+                } catch (error) {
+                    console.error('语音合成异常:', error);
+                    this.isPlaying = false;
+                    this.updateFloatPlayBtn();
+                    alert(`语音合成发生异常: ${error.message}`);
+                }
+            }
+
+            // 初始化浮动控制栏
+            initFloatingControls() {
+                const floatControls = document.getElementById('floatingControls');
+                const floatPlayBtn = document.getElementById('floatPlayBtn');
+                const floatVolumeUp = document.getElementById('floatVolumeUp');
+                const floatVolumeDown = document.getElementById('floatVolumeDown');
+                
+                // 播放/暂停按钮点击事件
+                floatPlayBtn.addEventListener('click', () => {
+                    if (this.isPlaying) {
+                        this.pause();
+                    } else {
+                        this.play();
+                    }
+                    this.resetFloatControlsTimer();
+                });
+                
+                // 音量增加按钮
+                floatVolumeUp.addEventListener('click', () => {
+                    const volumeSlider = document.getElementById('volumeSlider');
+                    let currentVolume = parseFloat(volumeSlider.value);
+                    currentVolume = Math.min(100, currentVolume + 10);
+                    volumeSlider.value = currentVolume;
+                    document.getElementById('volumeValue').textContent = `${currentVolume}%`;
+                    this.resetFloatControlsTimer();
+                });
+                
+                // 音量减少按钮
+                floatVolumeDown.addEventListener('click', () => {
+                    const volumeSlider = document.getElementById('volumeSlider');
+                    let currentVolume = parseFloat(volumeSlider.value);
+                    currentVolume = Math.max(0, currentVolume - 10);
+                    volumeSlider.value = currentVolume;
+                    document.getElementById('volumeValue').textContent = `${currentVolume}%`;
+                    this.resetFloatControlsTimer();
+                });
+                
+                // 鼠标悬停时展开
+                floatControls.addEventListener('mouseenter', () => {
+                    this.expandFloatControls();
+                    this.resetFloatControlsTimer();
+                });
+                
+                // 鼠标离开时重置计时器
+                floatControls.addEventListener('mouseleave', () => {
+                    this.resetFloatControlsTimer();
+                });
+                
+                // 初始启动计时器
+                this.resetFloatControlsTimer();
+            }
+
+            // 重置浮动控制栏计时器
+            resetFloatControlsTimer() {
+                if (this.floatControlsTimer) {
+                    clearTimeout(this.floatControlsTimer);
+                }
+                
+                // 展开控制栏
+                this.expandFloatControls();
+                
+                // 5秒后自动折叠
+                this.floatControlsTimer = setTimeout(() => {
+                    this.collapseFloatControls();
+                }, 5000);
+            }
+
+            // 折叠浮动控制栏
+            collapseFloatControls() {
+                const floatControls = document.getElementById('floatingControls');
+                if (floatControls) {
+                    floatControls.classList.add('collapsed');
+                    this.isControlsCollapsed = true;
+                }
+            }
+
+            // 展开浮动控制栏
+            expandFloatControls() {
+                const floatControls = document.getElementById('floatingControls');
+                if (floatControls) {
+                    floatControls.classList.remove('collapsed');
+                    this.isControlsCollapsed = false;
+                }
+            }
+
+            // 更新浮动播放按钮状态
+            updateFloatPlayBtn() {
+                const floatPlayBtn = document.getElementById('floatPlayBtn');
+                if (floatPlayBtn) {
+                    floatPlayBtn.textContent = this.isPlaying ? '⏸' : '▶';
+                }
+            }
+
+            // 检查元素是否在视口中可见
+            isElementInViewport(el) {
+                const rect = el.getBoundingClientRect();
+                return (
+                    rect.top >= 0 &&
+                    rect.left >= 0 &&
+                    rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+                    rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+                );
+            }
+
+            // 恢复自动滚动
+            restoreAutoScroll() {
+                this.autoScrollEnabled = true;
+            }
+
+            // 处理双击事件
+            handleDoubleClick() {
+                // 清除之前的计时器
+                if (this.doubleClickTimer) {
+                    clearTimeout(this.doubleClickTimer);
+                }
+                
+                // 增加双击计数
+                this.doubleClickCount++;
+                
+                // 设置500ms计时器，检测连续双击
+                this.doubleClickTimer = setTimeout(() => {
+                    if (this.doubleClickCount >= 2) {
+                        // 连续两次双击，切换智能滚动和高亮功能
+                        this.toggleSmartScrollAndHighlight();
+                    }
+                    // 重置计数
+                    this.doubleClickCount = 0;
+                }, 500);
+            }
+
+            // 切换智能滚动和高亮功能
+            toggleSmartScrollAndHighlight() {
+                // 切换状态
+                this.autoScrollEnabled = !this.autoScrollEnabled;
+                this.highlightEnabled = !this.highlightEnabled;
+                
+                // 更新高亮显示
+                this.updateHighlightDisplay();
+                
+                // 显示状态提示
+                const status = this.autoScrollEnabled && this.highlightEnabled ? '已开启' : '已关闭';
+                alert(`智能滚动和高亮功能 ${status}`);
+                
+                console.log(`智能滚动和高亮功能已${status}`, {
+                    autoScrollEnabled: this.autoScrollEnabled,
+                    highlightEnabled: this.highlightEnabled
+                });
+            }
+
+            // 更新高亮显示
+            updateHighlightDisplay() {
+                // 移除所有高亮
+                document.querySelectorAll('.paragraph').forEach(para => {
+                    para.classList.remove('active');
+                });
+                
+                // 如果高亮功能已开启，添加当前段落高亮
+                if (this.highlightEnabled) {
+                    const currentPara = document.querySelector(`[data-index="${this.currentParagraph}"]`);
+                    if (currentPara) {
+                        currentPara.classList.add('active');
+                    }
+                }
+            }
+
+            // 更新当前活跃段落
+            updateActiveParagraph() {
+                // 移除所有活跃状态
+                document.querySelectorAll('.paragraph').forEach(para => {
+                    para.classList.remove('active');
+                });
+                
+                // 添加当前活跃状态
+                const currentPara = document.querySelector(`[data-index="${this.currentParagraph}"]`);
+                if (currentPara) {
+                    // 只有在高亮功能开启时才添加高亮
+                    if (this.highlightEnabled) {
+                        currentPara.classList.add('active');
+                    }
+                    
+                    // 只有在正在播放且自动滚动启用时，才执行自动滚动逻辑
+                    if (this.isPlaying && this.autoScrollEnabled) {
+                        // 检查当前段落是否在视口中
+                        const isVisible = this.isElementInViewport(currentPara);
+                        
+                        if (isVisible) {
+                            // 如果当前段落已可见，直接滚动
+                            currentPara.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        } else {
+                            // 如果当前段落不可见，设置5秒后恢复自动滚动
+                            if (this.scrollTimer) {
+                                clearTimeout(this.scrollTimer);
+                            }
+                            this.scrollTimer = setTimeout(() => {
+                                this.restoreAutoScroll();
+                                currentPara.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            }, 5000);
+                        }
+                    }
+                }
+            }
+
+            // 更新时间显示
+            updateTimeDisplay(current, duration) {
+                const formatTime = (seconds) => {
+                    const mins = Math.floor(seconds / 60);
+                    const secs = Math.floor(seconds % 60);
+                    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+                };
+                
+                document.getElementById('currentTime').textContent = formatTime(current);
+                document.getElementById('duration').textContent = formatTime(duration);
+            }
+
+            // 加载示例文本
+            loadExampleText() {
+                // 创建一个超长文本示例用于测试
+                let longText = '';
+                const baseText = `且说黛玉自那日弃舟登岸时，便有荣国府打发了轿子并拉行李的车辆久候了。这林黛玉常听得母亲说过，他外祖母家与别家不同。他近日所见的这几个三等仆妇，吃穿用度，已是不凡了，何况今至其家。因此步步留心，时时在意，不肯轻易多说一句话，多行一步路，惟恐被人耻笑了他去。`;
+                
+                // 重复添加文本，生成超长内容
+                for (let i = 0; i < 15; i++) {
+                    longText += baseText;
+                }
+                
+                longText += `
+                    自上了轿，进入城中，从纱窗向外瞧了一瞧，其街市之繁华，人烟之阜盛，自与别处不同。又行了半日，忽见街北蹲着两个大石狮子，三间兽头大门，门前列坐着十来个华冠丽服之人。正门却不开，只有东西两角门有人出入。正门之上有一匾，匾上大书“敕造宁国府”五个大字。黛玉想道：这必是外祖之长房了。想着，又往西行，不多远，照样也是三间大门，方是荣国府了。却不进正门，只进了西边角门。那轿夫抬进去，走了一射之地，将转弯时，便歇下退出去了。后面的婆子们已都下了轿，赶上前来。另换了三四个衣帽周全十七八岁的小厮上来，复抬起轿子。众婆子步下围随至一垂花门前落下。众小厮退出，众婆子上来打起轿帘，扶黛玉下轿。林黛玉扶着婆子的手，进了垂花门，两边是抄手游廊，当中是穿堂，当地放着一个紫檀架子大理石的大插屏。转过插屏，小小的三间厅，厅后就是后面的正房大院。正面五间上房，皆雕梁画栋，两边穿山游廊厢房，挂着各色鹦鹉、画眉等鸟雀。台矶之上，坐着几个穿红着绿的丫头，一见他们来了，便忙都笑迎上来，说：“刚才老太太还念呢，可巧就来了。”于是三四人争着打起帘笼，一面听得人回话：“林姑娘到了。”
+                `;
+                
+                document.getElementById('textInput').value = longText.trim();
+                this.updateStats();
+            }
+
+            // 加载文件
+            loadFile(file) {
+                const reader = new FileReader();
+                
+                // 显示加载动画
+                const loadingOverlay = document.getElementById('loadingOverlay');
+                loadingOverlay.style.display = 'block';
+                
+                reader.onload = (e) => {
+                    document.getElementById('textInput').value = e.target.result;
+                    this.updateStats();
+                    
+                    // 检查是否需要自动处理文本
+                    const autoProcess = document.getElementById('autoProcess').checked;
+                    if (autoProcess) {
+                        // processText方法内部会处理加载动画的显示和隐藏
+                        this.processText();
+                    } else {
+                        // 如果不需要自动处理，直接隐藏加载动画
+                        loadingOverlay.style.display = 'none';
+                    }
+                };
+                
+                reader.onerror = () => {
+                    // 加载出错时隐藏加载动画
+                    loadingOverlay.style.display = 'none';
+                    alert('文件加载失败，请重试');
+                };
+                
+                reader.readAsText(file, 'utf-8');
+            }
+        }
+
+        // 初始化应用
+        document.addEventListener('DOMContentLoaded', () => {
+            new ChineseTTSReader();
+        });
+    </script>
+</body>
+</html>
