@@ -2,68 +2,131 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>中文小说语音阅读器</title>
-    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#ff69b4',
+                        secondary: '#ff1493',
+                        light: '#ffb6c1',
+                        lighter: '#fff0f5',
+                        lightest: '#ffe4e1',
+                    },
+                    fontFamily: {
+                        sans: ['Microsoft YaHei', 'PingFang SC', 'sans-serif'],
+                    },
+                },
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .text-shadow {
+                text-shadow: 2px 2px 4px rgba(255, 105, 180, 0.3);
+            }
+            .bg-gradient {
+                background: linear-gradient(135deg, #fff0f5 0%, #ffe4e1 100%);
+            }
+            .bg-gradient-primary {
+                background: linear-gradient(45deg, #ff69b4, #ff1493);
+            }
+            .bg-gradient-secondary {
+                background: linear-gradient(45deg, #ffb6c1, #ffc0cb);
+            }
+            .transition-all-300 {
+                transition: all 0.3s ease;
+            }
+        }
+    </style>
 </head>
-<body>
-    <div class="app-container">
-        <header class="app-header">
-            <h1>中文小说语音阅读器</h1>
-            <p>专业女性角色配音，沉浸式阅读体验</p>
+<body class="bg-gradient min-h-screen font-sans text-gray-800">
+    <div class="app-container max-w-7xl mx-auto p-4">
+        <header class="app-header text-center mb-5 p-4 bg-white/20 rounded-2xl shadow-lg">
+            <h1 class="text-2xl md:text-3xl font-bold text-primary text-shadow mb-2">中文小说语音阅读器</h1>
+            <p class="text-secondary text-sm md:text-base">专业女性角色配音，沉浸式阅读体验</p>
         </header>
 
-        <main class="app-main">
-            <div class="left-panel">
-                <section class="input-section">
-                    <div class="section-header">
-                        <h2>文本输入</h2>
-                        <div class="file-upload">
-                            <input type="file" id="fileInput" accept=".txt,.md" style="display: none;">
-                            <label for="fileInput" class="btn btn-secondary">上传文件</label>
-                            <button id="loadExample" class="btn btn-secondary">示例文本</button>
+        <main class="app-main flex flex-wrap gap-4">
+            <div class="left-panel flex-1 min-w-[280px] flex flex-col gap-4">
+                <section class="bg-white p-4 rounded-2xl shadow-lg transition-all-300 hover:translate-y-[-3px] hover:shadow-xl">
+                    <div class="section-header flex justify-between items-center mb-3 pb-2 border-b-2 border-light flex-wrap gap-2">
+                        <h2 class="text-lg font-semibold text-primary">文本输入</h2>
+                        <div class="file-upload flex gap-2 flex-wrap">
+                            <input type="file" id="fileInput" accept=".txt,.md" class="hidden">
+                            <label for="fileInput" class="btn btn-secondary bg-gradient-secondary text-gray-800 px-4 py-2 rounded-full text-sm font-semibold uppercase tracking-wider cursor-pointer transition-all-300 hover:translate-y-[-2px] hover:shadow-md">上传文件</label>
+                            <button id="loadExample" class="btn btn-secondary bg-gradient-secondary text-gray-800 px-4 py-2 rounded-full text-sm font-semibold uppercase tracking-wider transition-all-300 hover:translate-y-[-2px] hover:shadow-md">示例文本</button>
+                            <button id="saveProject" class="btn btn-secondary bg-gradient-secondary text-gray-800 px-4 py-2 rounded-full text-sm font-semibold uppercase tracking-wider transition-all-300 hover:translate-y-[-2px] hover:shadow-md">保存项目</button>
                         </div>
                     </div>
-                    <textarea id="textInput" placeholder="请输入或粘贴中文小说文本..."></textarea>
-                    <button id="processText" class="btn btn-primary">处理文本</button>
+                    <div class="mb-3 flex items-center">
+                        <input type="checkbox" id="autoProcess" name="autoProcess" checked class="mr-2">
+                        <label for="autoProcess" class="text-gray-600 font-semibold">上传文件后自动分页分词处理</label>
+                    </div>
+                    <textarea id="textInput" placeholder="请输入或粘贴中文小说文本..." class="w-full h-40 p-3 border-2 border-light rounded-lg resize-y text-sm font-sans leading-relaxed transition-all-300 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"></textarea>
+                    
+                    <!-- 加载动画 -->
+                    <div id="loadingOverlay" class="loading-overlay relative my-4 p-5 bg-white/90 rounded-lg shadow-md text-center hidden">
+                        <div class="loading-spinner inline-block w-10 h-10 border-4 border-light border-t-primary rounded-full animate-spin mb-2"></div>
+                        <div class="loading-text text-primary font-semibold text-sm">正在处理文件...</div>
+                    </div>
+                    
+                    <button id="processText" class="btn btn-primary bg-gradient-primary text-white w-full px-5 py-2 rounded-full text-sm font-semibold uppercase tracking-wider transition-all-300 hover:translate-y-[-2px] hover:shadow-lg mt-3">处理文本</button>
+                </section>
+                
+                <section class="bg-white p-4 rounded-2xl shadow-lg transition-all-300 hover:translate-y-[-3px] hover:shadow-xl">
+                    <div class="section-header flex justify-between items-center mb-3 pb-2 border-b-2 border-light flex-wrap gap-2">
+                        <h2 class="text-lg font-semibold text-primary">最近项目</h2>
+                        <button id="clearProjects" class="btn btn-secondary bg-gradient-secondary text-gray-800 px-4 py-2 rounded-full text-sm font-semibold uppercase tracking-wider transition-all-300 hover:translate-y-[-2px] hover:shadow-md">清空</button>
+                    </div>
+                    <div id="recentProjectsList" class="recent-projects-list max-h-52 overflow-y-auto bg-lighter rounded-lg border-2 border-light p-3">
+                        <!-- 最近项目列表将通过JavaScript动态生成 -->
+                        <p class="no-projects text-center text-gray-600 italic py-5">暂无保存的项目</p>
+                    </div>
                 </section>
 
-                <section class="voice-settings">
-                    <h2>语音设置</h2>
-                    <div class="setting-group">
-                        <label for="voiceSelect">选择配音</label>
-                        <select id="voiceSelect">
+                <section class="bg-white p-4 rounded-2xl shadow-lg transition-all-300 hover:translate-y-[-3px] hover:shadow-xl">
+                    <h2 class="text-lg font-semibold text-primary mb-3">语音设置</h2>
+                    <div class="setting-group mb-4">
+                        <label for="voiceSelect" class="block mb-2 text-gray-600 font-semibold text-sm">选择配音</label>
+                        <select id="voiceSelect" class="w-full p-2 border-2 border-light rounded-lg text-sm transition-all-300 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20">
                             <option value="zh-CN-XiaoxiaoNeural">晓晓（年轻活力）</option>
                             <option value="zh-CN-XiaoyiNeural">晓伊（甜美温柔）</option>
                             <option value="zh-CN-YunxiNeural">云希（清晰标准）</option>
                         </select>
                     </div>
-                    <div class="setting-group">
-                        <label for="rateSlider">语速: <span id="rateValue">1.0x</span></label>
-                        <input type="range" id="rateSlider" min="0.5" max="2.0" step="0.1" value="1.0">
+                    <div class="setting-group mb-4">
+                        <label for="rateSlider" class="block mb-2 text-gray-600 font-semibold text-sm">语速: <span id="rateValue">1.0x</span></label>
+                        <input type="range" id="rateSlider" min="0.5" max="2.0" step="0.1" value="1.0" class="w-full p-0 cursor-pointer border-2 border-light rounded-lg transition-all-300 focus:outline-none focus:border-primary">
+                    </div>
+                    <div class="setting-group mb-4">
+                        <label for="pitchSlider" class="block mb-2 text-gray-600 font-semibold text-sm">音调: <span id="pitchValue">1.0x</span></label>
+                        <input type="range" id="pitchSlider" min="0.5" max="2.0" step="0.1" value="1.0" class="w-full p-0 cursor-pointer border-2 border-light rounded-lg transition-all-300 focus:outline-none focus:border-primary">
                     </div>
                     <div class="setting-group">
-                        <label for="pitchSlider">音调: <span id="pitchValue">1.0x</span></label>
-                        <input type="range" id="pitchSlider" min="0.5" max="2.0" step="0.1" value="1.0">
-                    </div>
-                    <div class="setting-group">
-                        <label for="volumeSlider">音量: <span id="volumeValue">80%</span></label>
-                        <input type="range" id="volumeSlider" min="0" max="100" step="1" value="80">
+                        <label for="volumeSlider" class="block mb-2 text-gray-600 font-semibold text-sm">音量: <span id="volumeValue">80%</span></label>
+                        <input type="range" id="volumeSlider" min="0" max="100" step="1" value="80" class="w-full p-0 cursor-pointer border-2 border-light rounded-lg transition-all-300 focus:outline-none focus:border-primary">
                     </div>
                 </section>
 
-                <section class="playback-control">
-                    <h2>播放控制</h2>
-                    <div class="control-buttons">
-                        <button id="playBtn" class="btn btn-primary btn-large">播放</button>
-                        <button id="pauseBtn" class="btn btn-secondary btn-large">暂停</button>
-                        <button id="stopBtn" class="btn btn-secondary btn-large">停止</button>
+                <section class="bg-white p-4 rounded-2xl shadow-lg transition-all-300 hover:translate-y-[-3px] hover:shadow-xl">
+                    <h2 class="text-lg font-semibold text-primary mb-3">播放控制</h2>
+                    <div class="control-buttons flex gap-2 mb-4 flex-wrap">
+                        <button id="playBtn" class="btn btn-primary bg-gradient-primary text-white px-6 py-2 rounded-full text-sm font-semibold uppercase tracking-wider transition-all-300 hover:translate-y-[-2px] hover:shadow-lg">播放</button>
+                        <button id="pauseBtn" class="btn btn-secondary bg-gradient-secondary text-gray-800 px-6 py-2 rounded-full text-sm font-semibold uppercase tracking-wider transition-all-300 hover:translate-y-[-2px] hover:shadow-md">暂停</button>
+                        <button id="stopBtn" class="btn btn-secondary bg-gradient-secondary text-gray-800 px-6 py-2 rounded-full text-sm font-semibold uppercase tracking-wider transition-all-300 hover:translate-y-[-2px] hover:shadow-md">停止</button>
                     </div>
                     <div class="progress-section">
-                        <div class="waveform-container">
-                            <canvas id="waveformCanvas" width="300" height="60"></canvas>
+                        <div class="waveform-container flex justify-center bg-gray-100 rounded-lg p-2 mb-3">
+                            <canvas id="waveformCanvas" width="250" height="50" class="bg-white rounded-md shadow-sm max-w-full"></canvas>
                         </div>
-                        <div class="progress-info">
+                        <div class="progress-info flex justify-between text-gray-600 text-sm font-semibold">
                             <span id="currentTime">00:00</span>
                             <span id="duration">00:00</span>
                         </div>
@@ -71,34 +134,870 @@
                 </section>
             </div>
 
-            <div class="right-panel">
-                <section class="output-section">
-                    <div class="section-header">
-                        <h2>分词结果</h2>
-                        <div class="stats">
-                            <span>段落: <span id="paragraphCount">0</span></span>
-                            <span>字数: <span id="charCount">0</span></span>
+            <div class="right-panel flex-1.5 min-w-[280px]">
+                <section class="bg-white p-4 rounded-2xl shadow-lg transition-all-300 hover:translate-y-[-3px] hover:shadow-xl h-full">
+                    <div class="section-header flex justify-between items-center mb-3 pb-2 border-b-2 border-light flex-wrap gap-2">
+                        <h2 class="text-lg font-semibold text-primary">分词结果</h2>
+                        <div class="stats flex gap-3 flex-wrap">
+                            <span class="bg-light px-3 py-1 rounded-full text-white text-xs font-semibold">段落: <span id="paragraphCount">0</span></span>
+                            <span class="bg-light px-3 py-1 rounded-full text-white text-xs font-semibold">字数: <span id="charCount">0</span></span>
                         </div>
                     </div>
-                    <div id="segmentedText" class="segmented-text"></div>
+                    <div id="segmentedText" class="segmented-text flex-1 overflow-y-auto max-h-[500px] p-3 bg-lighter rounded-lg border-2 border-light"></div>
                 </section>
             </div>
         </main>
 
-    <!-- 浮动控制栏 -->
-    <div class="floating-controls" id="floatingControls">
-        <div class="controls-container">
-            <button id="floatPlayBtn" class="control-btn play-btn">▶</button>
-            <button id="floatVolumeUp" class="control-btn volume-btn">🔊</button>
-            <button id="floatVolumeDown" class="control-btn volume-btn">🔉</button>
+        <!-- 浮动控制栏 -->
+        <div class="floating-controls fixed bottom-4 right-4 z-50 transition-all-300" id="floatingControls">
+            <div class="controls-container flex gap-2 bg-white/95 p-2 rounded-full shadow-lg transition-all-300">
+                <button id="floatPlayBtn" class="control-btn play-btn bg-gradient-primary text-white w-14 h-14 rounded-full flex items-center justify-center text-lg shadow-md transition-all-300 hover:scale-110 hover:shadow-lg active:scale-95">▶</button>
+                <button id="floatVolumeUp" class="control-btn volume-btn bg-gradient-primary text-white w-11 h-11 rounded-full flex items-center justify-center text-sm shadow-md transition-all-300 hover:scale-110 hover:shadow-lg active:scale-95">🔊</button>
+                <button id="floatVolumeDown" class="control-btn volume-btn bg-gradient-primary text-white w-11 h-11 rounded-full flex items-center justify-center text-sm shadow-md transition-all-300 hover:scale-110 hover:shadow-lg active:scale-95">🔉</button>
+            </div>
         </div>
+
+        <footer class="app-footer text-center mt-5 p-4 bg-white/20 rounded-2xl text-gray-600 text-sm">
+            <p>中文小说语音阅读器 - 基于浏览器语音合成技术 | 所有数据均在本地处理</p>
+        </footer>
     </div>
 
-    <footer class="app-footer">
-        <p>中文小说语音阅读器 - 基于Edge TTS技术 | 所有数据均在本地处理，保护隐私</p>
-    </footer>
-</div>
+    <script>
+        // 中文小说语音阅读器主脚本 - 函数式实现
 
-<script src="script.js"></script>
+        // 全局状态
+        const state = {
+            segmentedText: [],
+            currentParagraph: 0,
+            isPlaying: false,
+            speechSynthesis: window.speechSynthesis,
+            utterance: null,
+            voices: [],
+            scrollTimer: null,
+            autoScrollEnabled: true,
+            floatControlsTimer: null,
+            isControlsCollapsed: false,
+            doubleClickTimer: null,
+            doubleClickCount: 0,
+            highlightEnabled: true,
+            MAX_PROJECTS: 5 // 最多保存5个项目
+        };
+
+        // 初始化应用
+        function initApp() {
+            bindEvents();
+            initWaveform();
+            updateStats();
+            initVoices();
+            loadRecentProjects();
+        }
+
+        // 初始化语音列表
+        function initVoices() {
+            state.voices = state.speechSynthesis.getVoices();
+            
+            state.speechSynthesis.onvoiceschanged = () => {
+                state.voices = state.speechSynthesis.getVoices();
+                console.log('可用语音列表加载完成:', state.voices.map(v => v.name));
+            };
+        }
+
+        // 获取指定voiceURI的语音对象
+        function getVoiceByURI(voiceURI) {
+            let voice = state.voices.find(voice => 
+                voice.voiceURI === voiceURI || 
+                voice.name === voiceURI ||
+                voice.name.includes(voiceURI.split('-')[2])
+            );
+            
+            if (!voice) {
+                voice = state.voices.find(voice => voice.lang === 'zh-CN');
+            }
+            
+            if (!voice && state.voices.length > 0) {
+                voice = state.voices[0];
+            }
+            
+            return voice;
+        }
+
+        // 检查浏览器是否支持语音合成
+        function checkSpeechSupport() {
+            if ('speechSynthesis' in window) {
+                if (state.voices.length === 0) {
+                    state.voices = state.speechSynthesis.getVoices();
+                    
+                    if (state.voices.length === 0) {
+                        alert('您的浏览器支持语音合成，但未检测到可用语音。请检查浏览器设置或更新浏览器版本。');
+                        return false;
+                    }
+                }
+                return true;
+            } else {
+                alert('您的浏览器不支持语音合成功能，请使用Chrome 33+、Edge 14+或Safari 7+浏览器');
+                return false;
+            }
+        }
+
+        // 获取语音列表并等待加载完成
+        function getVoicesAsync() {
+            return new Promise((resolve) => {
+                let voices = state.speechSynthesis.getVoices();
+                if (voices.length > 0) {
+                    resolve(voices);
+                    return;
+                }
+
+                state.speechSynthesis.onvoiceschanged = () => {
+                    voices = state.speechSynthesis.getVoices();
+                    resolve(voices);
+                };
+
+                setTimeout(() => {
+                    resolve(state.speechSynthesis.getVoices());
+                }, 2000);
+            });
+        }
+
+        // 绑定事件监听器
+        function bindEvents() {
+            // 处理文本按钮
+            document.getElementById('processText').addEventListener('click', processText);
+
+            // 播放控制按钮
+            document.getElementById('playBtn').addEventListener('click', play);
+            document.getElementById('pauseBtn').addEventListener('click', pause);
+            document.getElementById('stopBtn').addEventListener('click', stop);
+
+            // 语音参数调节
+            document.getElementById('rateSlider').addEventListener('input', (e) => {
+                document.getElementById('rateValue').textContent = `${e.target.value}x`;
+            });
+
+            document.getElementById('pitchSlider').addEventListener('input', (e) => {
+                document.getElementById('pitchValue').textContent = `${e.target.value}x`;
+            });
+
+            document.getElementById('volumeSlider').addEventListener('input', (e) => {
+                document.getElementById('volumeValue').textContent = `${e.target.value}%`;
+            });
+
+            // 文件上传
+            document.getElementById('fileInput').addEventListener('change', (e) => {
+                loadFile(e.target.files[0]);
+            });
+
+            // 示例文本
+            document.getElementById('loadExample').addEventListener('click', loadExampleText);
+
+            // 保存项目
+            document.getElementById('saveProject').addEventListener('click', saveProject);
+
+            // 清空项目
+            document.getElementById('clearProjects').addEventListener('click', clearProjects);
+
+            // 文本输入变化时更新统计
+            document.getElementById('textInput').addEventListener('input', updateStats);
+            
+            // 监听滚动事件，用户手动滚动时禁用自动滚动
+            const outputSection = document.getElementById('segmentedText');
+            if (outputSection) {
+                outputSection.addEventListener('scroll', () => {
+                    state.autoScrollEnabled = false;
+                    
+                    if (state.scrollTimer) {
+                        clearTimeout(state.scrollTimer);
+                    }
+                    
+                    state.scrollTimer = setTimeout(() => {
+                        restoreAutoScroll();
+                    }, 5000);
+                    
+                    resetFloatControlsTimer();
+                });
+            }
+            
+            // 添加连续两次双击事件监听
+            document.addEventListener('dblclick', (e) => {
+                if (e.target.tagName === 'BODY' || e.target.className === 'app-container') {
+                    handleDoubleClick();
+                }
+            });
+            
+            // 浮动控制栏事件绑定
+            initFloatingControls();
+        }
+
+        // 初始化波形显示
+        function initWaveform() {
+            const canvas = document.getElementById('waveformCanvas');
+            const ctx = canvas.getContext('2d');
+            drawDefaultWaveform(ctx, canvas.width, canvas.height);
+        }
+
+        // 绘制默认波形
+        function drawDefaultWaveform(ctx, width, height) {
+            ctx.clearRect(0, 0, width, height);
+            ctx.strokeStyle = '#ff69b4';
+            ctx.lineWidth = 2;
+            
+            ctx.beginPath();
+            ctx.moveTo(0, height / 2);
+            
+            for (let i = 0; i < width; i++) {
+                const x = i;
+                const y = height / 2 + Math.sin(i * 0.02) * 15;
+                ctx.lineTo(x, y);
+            }
+            
+            ctx.stroke();
+        }
+
+        // 智能中文分词处理
+        function processText() {
+            const text = document.getElementById('textInput').value.trim();
+            if (!text) {
+                alert('请输入文本内容');
+                return;
+            }
+
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            loadingOverlay.classList.remove('hidden');
+
+            setTimeout(async () => {
+                try {
+                    state.segmentedText = await segmentParagraphs(text);
+                    displaySegmentedText();
+                    updateStats();
+                } catch (error) {
+                    console.error('处理文本时出错:', error);
+                    alert('处理文本时出错，请重试');
+                } finally {
+                    loadingOverlay.classList.add('hidden');
+                }
+            }, 100);
+        }
+
+        // 基于标点符号和语义的智能分段，支持超长文本处理
+        async function segmentParagraphs(text) {
+            let paragraphs = text.split(/[\r\n]+/).filter(p => p.trim());
+            const sentenceEndings = /([。！？；…])/g;
+            const segmented = [];
+            const MAX_PARAGRAPH_LENGTH = 1500;
+            const BATCH_SIZE = 10;
+            
+            for (let i = 0; i < paragraphs.length; i += BATCH_SIZE) {
+                const batch = paragraphs.slice(i, i + BATCH_SIZE);
+                
+                for (const para of batch) {
+                    if (para.length > MAX_PARAGRAPH_LENGTH) {
+                        let remainingText = para;
+                        while (remainingText.length > MAX_PARAGRAPH_LENGTH) {
+                            let splitIndex = remainingText.lastIndexOf('。', MAX_PARAGRAPH_LENGTH);
+                            if (splitIndex === -1) splitIndex = remainingText.lastIndexOf('！', MAX_PARAGRAPH_LENGTH);
+                            if (splitIndex === -1) splitIndex = remainingText.lastIndexOf('？', MAX_PARAGRAPH_LENGTH);
+                            if (splitIndex === -1) splitIndex = remainingText.lastIndexOf('；', MAX_PARAGRAPH_LENGTH);
+                            if (splitIndex === -1) {
+                                splitIndex = MAX_PARAGRAPH_LENGTH;
+                            } else {
+                                splitIndex += 1;
+                            }
+                            
+                            let subParagraph = remainingText.substring(0, splitIndex);
+                            remainingText = remainingText.substring(splitIndex);
+                            processSubParagraph(subParagraph, segmented);
+                        }
+                        
+                        if (remainingText.trim()) {
+                            processSubParagraph(remainingText, segmented);
+                        }
+                    } else {
+                        processSubParagraph(para, segmented);
+                    }
+                }
+                
+                if (i + BATCH_SIZE < paragraphs.length) {
+                    await new Promise(resolve => setTimeout(resolve, 50));
+                }
+            }
+            
+            return segmented;
+        }
+        
+        // 处理子段落
+        function processSubParagraph(para, segmented) {
+            const sentenceEndings = /([。！？；…])/g;
+            let sentences = para.split(sentenceEndings);
+            
+            for (let i = 0; i < sentences.length; i += 2) {
+                if (sentences[i]) {
+                    let sentence = sentences[i] + (sentences[i + 1] || '');
+                    segmented.push(segmentWords(sentence));
+                }
+            }
+        }
+
+        // 中文分词处理
+        function segmentWords(sentence) {
+            sentence = sentence.replace(/\s+/g, '');
+            const commonWords = ['的', '了', '是', '在', '我', '有', '和', '就', '不', '人', '都', '一', '一个', '上', '也', '很', '到', '说', '要', '去', '你', '会', '着', '没有', '看', '好', '自己', '这'];
+            const words = [];
+            let i = 0;
+            
+            while (i < sentence.length) {
+                let found = false;
+                
+                if (i < sentence.length - 1) {
+                    const twoChar = sentence.substr(i, 2);
+                    if (commonWords.includes(twoChar)) {
+                        words.push(twoChar);
+                        i += 2;
+                        found = true;
+                    }
+                }
+                
+                if (!found) {
+                    const oneChar = sentence.substr(i, 1);
+                    if (commonWords.includes(oneChar)) {
+                        words.push(oneChar);
+                    } else {
+                        let j = i + 1;
+                        while (j < sentence.length && !commonWords.includes(sentence.substr(j, 1))) {
+                            j++;
+                        }
+                        words.push(sentence.substr(i, j - i));
+                        i = j;
+                        continue;
+                    }
+                    i++;
+                }
+            }
+            
+            return {
+                text: sentence,
+                words: words
+            };
+        }
+
+        // 显示分词结果
+        function displaySegmentedText() {
+            const container = document.getElementById('segmentedText');
+            container.innerHTML = '';
+            
+            const fragment = document.createDocumentFragment();
+            
+            state.segmentedText.forEach((paragraph, index) => {
+                const paraElement = document.createElement('div');
+                paraElement.className = 'paragraph mb-4 p-3 bg-white rounded-lg shadow-sm cursor-pointer transition-all-300 hover:translate-x-1 hover:shadow-md hover:bg-lighter border-l-4 border-primary';
+                paraElement.dataset.index = index;
+                
+                paragraph.words.forEach(word => {
+                    const wordElement = document.createElement('span');
+                    wordElement.className = 'word inline-block m-1 px-2 py-1 bg-light text-gray-800 rounded-full text-xs transition-all-300 hover:bg-primary hover:text-white hover:scale-105';
+                    wordElement.textContent = word;
+                    paraElement.appendChild(wordElement);
+                });
+                
+                paraElement.addEventListener('click', () => {
+                    playFromParagraph(index);
+                });
+                
+                fragment.appendChild(paraElement);
+            });
+            
+            container.appendChild(fragment);
+        }
+
+        // 更新统计信息
+        function updateStats() {
+            const text = document.getElementById('textInput').value;
+            const charCount = text.replace(/\s/g, '').length;
+            const paragraphCount = state.segmentedText.length;
+            
+            document.getElementById('charCount').textContent = charCount;
+            document.getElementById('paragraphCount').textContent = paragraphCount;
+        }
+
+        // 播放语音
+        function play() {
+            if (state.segmentedText.length === 0) {
+                alert('请先处理文本');
+                return;
+            }
+            
+            if (state.isPlaying) {
+                state.speechSynthesis.resume();
+            } else {
+                speakCurrentParagraph();
+            }
+            
+            state.isPlaying = true;
+            updateFloatPlayBtn();
+        }
+
+        // 暂停播放
+        function pause() {
+            if (state.isPlaying) {
+                state.speechSynthesis.pause();
+                state.isPlaying = false;
+                updateFloatPlayBtn();
+            }
+        }
+
+        // 停止播放
+        function stop() {
+            state.speechSynthesis.cancel();
+            state.isPlaying = false;
+            state.currentParagraph = 0;
+            updateActiveParagraph();
+            updateTimeDisplay(0, 0);
+            updateFloatPlayBtn();
+        }
+
+        // 从指定段落开始播放
+        function playFromParagraph(index) {
+            stop();
+            state.currentParagraph = index;
+            state.isPlaying = true;
+            updateFloatPlayBtn();
+            speakCurrentParagraph();
+        }
+
+        // 播放当前段落
+        function speakCurrentParagraph() {
+            try {
+                if (!('speechSynthesis' in window)) {
+                    alert('您的浏览器不支持语音合成功能，请使用Chrome 33+、Edge 14+或Safari 7+浏览器');
+                    state.isPlaying = false;
+                    updateFloatPlayBtn();
+                    return;
+                }
+                
+                if (state.currentParagraph >= state.segmentedText.length) {
+                    stop();
+                    return;
+                }
+                
+                updateActiveParagraph();
+                
+                const paragraph = state.segmentedText[state.currentParagraph].text;
+                const utterance = new SpeechSynthesisUtterance(paragraph);
+                
+                utterance.lang = 'zh-CN';
+                utterance.rate = parseFloat(document.getElementById('rateSlider').value);
+                utterance.pitch = parseFloat(document.getElementById('pitchSlider').value);
+                utterance.volume = parseFloat(document.getElementById('volumeSlider').value) / 100;
+                
+                console.log('正在播放段落:', paragraph);
+                console.log('语音设置:', {
+                    lang: utterance.lang,
+                    rate: utterance.rate,
+                    pitch: utterance.pitch,
+                    volume: utterance.volume
+                });
+                
+                utterance.onend = () => {
+                    console.log('段落播放结束');
+                    state.currentParagraph++;
+                    speakCurrentParagraph();
+                };
+                
+                utterance.onerror = (event) => {
+                    console.error('语音合成错误:', event.error, '错误事件:', event);
+                    state.isPlaying = false;
+                    updateFloatPlayBtn();
+                    alert('语音合成失败，请尝试：\n1. 刷新页面\n2. 更换浏览器\n3. 检查浏览器语音设置');
+                };
+                
+                state.speechSynthesis.speak(utterance);
+                
+            } catch (error) {
+                console.error('语音合成异常:', error);
+                state.isPlaying = false;
+                updateFloatPlayBtn();
+                alert(`语音合成发生异常: ${error.message}`);
+            }
+        }
+
+        // 初始化浮动控制栏
+        function initFloatingControls() {
+            const floatControls = document.getElementById('floatingControls');
+            const floatPlayBtn = document.getElementById('floatPlayBtn');
+            const floatVolumeUp = document.getElementById('floatVolumeUp');
+            const floatVolumeDown = document.getElementById('floatVolumeDown');
+            
+            floatPlayBtn.addEventListener('click', () => {
+                if (state.isPlaying) {
+                    pause();
+                } else {
+                    play();
+                }
+                resetFloatControlsTimer();
+            });
+            
+            floatVolumeUp.addEventListener('click', () => {
+                const volumeSlider = document.getElementById('volumeSlider');
+                let currentVolume = parseFloat(volumeSlider.value);
+                currentVolume = Math.min(100, currentVolume + 10);
+                volumeSlider.value = currentVolume;
+                document.getElementById('volumeValue').textContent = `${currentVolume}%`;
+                resetFloatControlsTimer();
+            });
+            
+            floatVolumeDown.addEventListener('click', () => {
+                const volumeSlider = document.getElementById('volumeSlider');
+                let currentVolume = parseFloat(volumeSlider.value);
+                currentVolume = Math.max(0, currentVolume - 10);
+                volumeSlider.value = currentVolume;
+                document.getElementById('volumeValue').textContent = `${currentVolume}%`;
+                resetFloatControlsTimer();
+            });
+            
+            floatControls.addEventListener('mouseenter', () => {
+                expandFloatControls();
+                resetFloatControlsTimer();
+            });
+            
+            floatControls.addEventListener('mouseleave', () => {
+                resetFloatControlsTimer();
+            });
+            
+            resetFloatControlsTimer();
+        }
+
+        // 重置浮动控制栏计时器
+        function resetFloatControlsTimer() {
+            if (state.floatControlsTimer) {
+                clearTimeout(state.floatControlsTimer);
+            }
+            
+            expandFloatControls();
+            
+            state.floatControlsTimer = setTimeout(() => {
+                collapseFloatControls();
+            }, 5000);
+        }
+
+        // 折叠浮动控制栏
+        function collapseFloatControls() {
+            const floatControls = document.getElementById('floatingControls');
+            if (floatControls) {
+                floatControls.classList.add('collapsed');
+                const volumeBtns = floatControls.querySelectorAll('.volume-btn');
+                volumeBtns.forEach(btn => {
+                    btn.classList.add('opacity-0', 'invisible', 'w-0', 'p-0');
+                });
+                state.isControlsCollapsed = true;
+            }
+        }
+
+        // 展开浮动控制栏
+        function expandFloatControls() {
+            const floatControls = document.getElementById('floatingControls');
+            if (floatControls) {
+                floatControls.classList.remove('collapsed');
+                const volumeBtns = floatControls.querySelectorAll('.volume-btn');
+                volumeBtns.forEach(btn => {
+                    btn.classList.remove('opacity-0', 'invisible', 'w-0', 'p-0');
+                });
+                state.isControlsCollapsed = false;
+            }
+        }
+
+        // 更新浮动播放按钮状态
+        function updateFloatPlayBtn() {
+            const floatPlayBtn = document.getElementById('floatPlayBtn');
+            if (floatPlayBtn) {
+                floatPlayBtn.textContent = state.isPlaying ? '⏸' : '▶';
+            }
+        }
+
+        // 检查元素是否在视口中可见
+        function isElementInViewport(el) {
+            const rect = el.getBoundingClientRect();
+            return (
+                rect.top >= 0 &&
+                rect.left >= 0 &&
+                rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+                rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+            );
+        }
+
+        // 恢复自动滚动
+        function restoreAutoScroll() {
+            state.autoScrollEnabled = true;
+        }
+
+        // 处理双击事件
+        function handleDoubleClick() {
+            if (state.doubleClickTimer) {
+                clearTimeout(state.doubleClickTimer);
+            }
+            
+            state.doubleClickCount++;
+            
+            state.doubleClickTimer = setTimeout(() => {
+                if (state.doubleClickCount >= 2) {
+                    toggleSmartScrollAndHighlight();
+                }
+                state.doubleClickCount = 0;
+            }, 500);
+        }
+
+        // 切换智能滚动和高亮功能
+        function toggleSmartScrollAndHighlight() {
+            state.autoScrollEnabled = !state.autoScrollEnabled;
+            state.highlightEnabled = !state.highlightEnabled;
+            
+            updateHighlightDisplay();
+            
+            const status = state.autoScrollEnabled && state.highlightEnabled ? '已开启' : '已关闭';
+            alert(`智能滚动和高亮功能 ${status}`);
+            
+            console.log(`智能滚动和高亮功能已${status}`, {
+                autoScrollEnabled: state.autoScrollEnabled,
+                highlightEnabled: state.highlightEnabled
+            });
+        }
+
+        // 更新高亮显示
+        function updateHighlightDisplay() {
+            document.querySelectorAll('.paragraph').forEach(para => {
+                para.classList.remove('active', 'bg-lightest', 'border-secondary', 'shadow-lg');
+            });
+            
+            if (state.highlightEnabled) {
+                const currentPara = document.querySelector(`[data-index="${state.currentParagraph}"]`);
+                if (currentPara) {
+                    currentPara.classList.add('active', 'bg-lightest', 'border-secondary', 'shadow-lg');
+                }
+            }
+        }
+
+        // 更新当前活跃段落
+        function updateActiveParagraph() {
+            document.querySelectorAll('.paragraph').forEach(para => {
+                para.classList.remove('active', 'bg-lightest', 'border-secondary', 'shadow-lg');
+            });
+            
+            const currentPara = document.querySelector(`[data-index="${state.currentParagraph}"]`);
+            if (currentPara) {
+                if (state.highlightEnabled) {
+                    currentPara.classList.add('active', 'bg-lightest', 'border-secondary', 'shadow-lg');
+                }
+                
+                if (state.isPlaying && state.autoScrollEnabled) {
+                    const isVisible = isElementInViewport(currentPara);
+                    
+                    if (isVisible) {
+                        currentPara.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    } else {
+                        if (state.scrollTimer) {
+                            clearTimeout(state.scrollTimer);
+                        }
+                        state.scrollTimer = setTimeout(() => {
+                            restoreAutoScroll();
+                            currentPara.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }, 5000);
+                    }
+                }
+            }
+        }
+
+        // 更新时间显示
+        function updateTimeDisplay(current, duration) {
+            const formatTime = (seconds) => {
+                const mins = Math.floor(seconds / 60);
+                const secs = Math.floor(seconds % 60);
+                return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            };
+            
+            document.getElementById('currentTime').textContent = formatTime(current);
+            document.getElementById('duration').textContent = formatTime(duration);
+        }
+
+        // 加载示例文本
+        function loadExampleText() {
+            let longText = '';
+            const baseText = `且说黛玉自那日弃舟登岸时，便有荣国府打发了轿子并拉行李的车辆久候了。这林黛玉常听得母亲说过，他外祖母家与别家不同。他近日所见的这几个三等仆妇，吃穿用度，已是不凡了，何况今至其家。因此步步留心，时时在意，不肯轻易多说一句话，多行一步路，惟恐被人耻笑了他去。`;
+            
+            for (let i = 0; i < 15; i++) {
+                longText += baseText;
+            }
+            
+            longText += `
+                自上了轿，进入城中，从纱窗向外瞧了一瞧，其街市之繁华，人烟之阜盛，自与别处不同。又行了半日，忽见街北蹲着两个大石狮子，三间兽头大门，门前列坐着十来个华冠丽服之人。正门却不开，只有东西两角门有人出入。正门之上有一匾，匾上大书“敕造宁国府”五个大字。黛玉想道：这必是外祖之长房了。想着，又往西行，不多远，照样也是三间大门，方是荣国府了。却不进正门，只进了西边角门。那轿夫抬进去，走了一射之地，将转弯时，便歇下退出去了。后面的婆子们已都下了轿，赶上前来。另换了三四个衣帽周全十七八岁的小厮上来，复抬起轿子。众婆子步下围随至一垂花门前落下。众小厮退出，众婆子上来打起轿帘，扶黛玉下轿。林黛玉扶着婆子的手，进了垂花门，两边是抄手游廊，当中是穿堂，当地放着一个紫檀架子大理石的大插屏。转过插屏，小小的三间厅，厅后就是后面的正房大院。正面五间上房，皆雕梁画栋，两边穿山游廊厢房，挂着各色鹦鹉、画眉等鸟雀。台矶之上，坐着几个穿红着绿的丫头，一见他们来了，便忙都笑迎上来，说：“刚才老太太还念呢，可巧就来了。”于是三四人争着打起帘笼，一面听得人回话：“林姑娘到了。”
+            `;
+            
+            document.getElementById('textInput').value = longText.trim();
+            updateStats();
+        }
+
+        // 加载文件
+        function loadFile(file) {
+            const reader = new FileReader();
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            loadingOverlay.classList.remove('hidden');
+            
+            reader.onload = (e) => {
+                document.getElementById('textInput').value = e.target.result;
+                updateStats();
+                
+                const autoProcess = document.getElementById('autoProcess').checked;
+                if (autoProcess) {
+                    processText();
+                } else {
+                    loadingOverlay.classList.add('hidden');
+                }
+            };
+            
+            reader.onerror = () => {
+                loadingOverlay.classList.add('hidden');
+                alert('文件加载失败，请重试');
+            };
+            
+            reader.readAsText(file, 'utf-8');
+        }
+        
+        // 保存项目
+        function saveProject() {
+            const text = document.getElementById('textInput').value.trim();
+            if (!text) {
+                alert('请输入文本内容');
+                return;
+            }
+            
+            const voiceSelect = document.getElementById('voiceSelect').value;
+            const rate = document.getElementById('rateSlider').value;
+            const pitch = document.getElementById('pitchSlider').value;
+            const volume = document.getElementById('volumeSlider').value;
+            
+            const project = {
+                id: Date.now(),
+                title: text.substring(0, 50) + (text.length > 50 ? '...' : ''),
+                text: text,
+                voice: voiceSelect,
+                rate: rate,
+                pitch: pitch,
+                volume: volume,
+                timestamp: new Date().toISOString()
+            };
+            
+            let projects = JSON.parse(localStorage.getItem('ttsProjects') || '[]');
+            projects = projects.filter(p => p.id !== project.id);
+            projects.unshift(project);
+            
+            if (projects.length > state.MAX_PROJECTS) {
+                projects = projects.slice(0, state.MAX_PROJECTS);
+            }
+            
+            localStorage.setItem('ttsProjects', JSON.stringify(projects));
+            loadRecentProjects();
+            alert('项目保存成功');
+        }
+        
+        // 加载最近项目
+        function loadRecentProjects() {
+            const projects = JSON.parse(localStorage.getItem('ttsProjects') || '[]');
+            const projectsList = document.getElementById('recentProjectsList');
+            
+            if (projects.length === 0) {
+                projectsList.innerHTML = '<p class="no-projects text-center text-gray-600 italic py-5">暂无保存的项目</p>';
+                return;
+            }
+            
+            projectsList.innerHTML = '';
+            
+            projects.forEach(project => {
+                const projectItem = document.createElement('div');
+                projectItem.className = 'project-item flex justify-between items-center p-2 mb-2 bg-white rounded-lg shadow-sm cursor-pointer transition-all-300 hover:translate-x-1 hover:shadow-md hover:bg-lighter';
+                
+                const projectInfo = document.createElement('div');
+                projectInfo.className = 'project-info flex-1';
+                
+                const projectTitle = document.createElement('div');
+                projectTitle.className = 'project-title font-semibold text-gray-800 mb-1 text-sm truncate';
+                projectTitle.textContent = project.title;
+                
+                const projectMeta = document.createElement('div');
+                projectMeta.className = 'project-meta text-xs text-gray-600';
+                const date = new Date(project.timestamp);
+                projectMeta.textContent = `${date.toLocaleString()} · ${Math.round(project.text.length / 1000)}k字`;
+                
+                const projectActions = document.createElement('div');
+                projectActions.className = 'project-actions flex gap-2';
+                
+                const loadBtn = document.createElement('button');
+                loadBtn.className = 'project-btn load bg-light text-gray-800 px-2 py-1 rounded text-xs font-semibold transition-all-300 hover:translate-y-[-1px] hover:shadow-md';
+                loadBtn.textContent = '加载';
+                loadBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    loadProject(project.id);
+                });
+                
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'project-btn delete bg-red-500 text-white px-2 py-1 rounded text-xs font-semibold transition-all-300 hover:translate-y-[-1px] hover:shadow-md';
+                deleteBtn.textContent = '删除';
+                deleteBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    deleteProject(project.id);
+                });
+                
+                projectInfo.appendChild(projectTitle);
+                projectInfo.appendChild(projectMeta);
+                projectActions.appendChild(loadBtn);
+                projectActions.appendChild(deleteBtn);
+                projectItem.appendChild(projectInfo);
+                projectItem.appendChild(projectActions);
+                
+                projectsList.appendChild(projectItem);
+            });
+        }
+        
+        // 加载项目
+        function loadProject(projectId) {
+            const projects = JSON.parse(localStorage.getItem('ttsProjects') || '[]');
+            const project = projects.find(p => p.id === projectId);
+            
+            if (!project) {
+                alert('项目不存在');
+                return;
+            }
+            
+            document.getElementById('textInput').value = project.text;
+            document.getElementById('voiceSelect').value = project.voice;
+            document.getElementById('rateSlider').value = project.rate;
+            document.getElementById('pitchSlider').value = project.pitch;
+            document.getElementById('volumeSlider').value = project.volume;
+            
+            document.getElementById('rateValue').textContent = `${project.rate}x`;
+            document.getElementById('pitchValue').textContent = `${project.pitch}x`;
+            document.getElementById('volumeValue').textContent = `${project.volume}%`;
+            
+            updateStats();
+            alert('项目加载成功');
+        }
+        
+        // 删除项目
+        function deleteProject(projectId) {
+            if (confirm('确定要删除这个项目吗？')) {
+                let projects = JSON.parse(localStorage.getItem('ttsProjects') || '[]');
+                projects = projects.filter(p => p.id !== projectId);
+                localStorage.setItem('ttsProjects', JSON.stringify(projects));
+                loadRecentProjects();
+            }
+        }
+        
+        // 清空项目
+        function clearProjects() {
+            if (confirm('确定要清空所有项目吗？')) {
+                localStorage.removeItem('ttsProjects');
+                loadRecentProjects();
+            }
+        }
+
+        // 初始化应用
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
 </body>
 </html>

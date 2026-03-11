@@ -164,6 +164,7 @@
 ```
 tts-ai/
 ├── index.html          # 主页面文件
+├── index_v2.html       # 主页面文件 v2
 ├── styles.css          # 样式文件
 ├── script.js           # 核心功能脚本
 └── README.md          # 项目说明文档
